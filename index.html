@@ -68,17 +68,13 @@
     const REDIS_URL = "https://exact-parakeet-58043.upstash.io";
     const REDIS_TOKEN = "AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
 
-    // تفعيل EmailJS
+    // تفعيل EmailJS باستخدام الـ Public Key الخاص بك
     emailjs.init("Yv-DxRXZ5X9ZmSg3K");
 
+    // قائمة الأسئلة (تم تقليلها لـ 2 فقط)
     const qList = [
-        "تصريح العمل الأساسي والثانوي متواجد", "اجتماع ما قبل البدء بالموقع (TBT)", "نموذج فريق العمل متواجد وموقع",
-        "إجراءات العمل الآمن JSA متوفرة", "إلمام الفريق بالمخاطر المذكورة", "بطاقة تعميد المصدر والمستلم",
-        "تأهيل سائق المعدات ساري", "المستلم متواجد بموقع العمل", "وضع أقفال السلامة (LOTO)",
-        "تركيب الأرضي المتنقل من الجهتين", "فعالية جهاز التستر", "فحص المركبة والعدد",
-        "شهادة المسعف ومكافح الحريق", "شهادة TUV للمعدات والرفع", "طفاية حريق سليمة ومفحوصة",
-        "شنطة إسعافات أولية مكتملة", "خوذة - ملابس - حذاء السلامة سليم"
-        // سيتم توليد الباقي تلقائياً حتى 113 بند
+        "تصريح العمل الأساسي والثانوي متواجد ومكتمل البيانات", 
+        "اجتماع ما قبل البدء بالموقع (TBT) ومخاطر العمل"
     ];
 
     async function doLogin() {
@@ -107,8 +103,9 @@
 
     function loadQuestions() {
         const container = document.getElementById('questionsContainer');
-        for(let i=1; i<=113; i++) {
-            const qText = qList[i-1] || `بند فحص السلامة رقم ${i}`;
+        container.innerHTML = ""; 
+        for(let i=1; i<=qList.length; i++) {
+            const qText = qList[i-1];
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
@@ -129,29 +126,31 @@
 
     function showV(id, show) { document.getElementById(`vbox${id}`).style.display = show ? 'block' : 'none'; }
 
-    async function changeMyPass() {
-        const u = sessionStorage.getItem('inspector');
-        const np = prompt("أدخل كلمة السر الجديدة:");
-        if(np && np.length >= 4) {
-            await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`}, body:np });
-            alert("✅ تم التغيير، سجل دخولك مجدداً");
-            logout();
-        }
-    }
-
-    function logout() { sessionStorage.clear(); location.reload(); }
-
-    const toBase64 = file => new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => res(reader.result);
-        reader.onerror = e => rej(e);
-    });
+    const compressImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600; 
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                };
+            };
+        });
+    };
 
     document.getElementById('safetyForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('sBtn');
-        btn.disabled = true; btn.innerText = "جاري الحفظ وإرسال التنبيه...";
+        btn.disabled = true; btn.innerText = "جاري الإرسال...";
 
         try {
             const reportId = Date.now();
@@ -162,34 +161,66 @@
                 timestamp: new Date().toLocaleString('ar-EG'),
                 location: formData.get('location'),
                 job_order: formData.get('job_order'),
+                report_date: formData.get('report_date'),
                 answers: {}, violations: []
             };
 
-            for(let i=1; i<=113; i++) {
+            for(let i=1; i<=qList.length; i++) {
                 const val = formData.get(`q${i}`);
-                report.answers[i] = val || "N/A";
+                report.answers[i] = val;
                 if(val === 'مخالف') {
                     const img = document.getElementById(`img${i}`).files[0];
                     report.violations.push({
-                        id: i, q: qList[i-1] || `بند ${i}`, 
+                        id: i, q: qList[i-1], 
                         note: document.getElementById(`note${i}`).value,
-                        photo: img ? await toBase64(img) : ""
+                        photo: img ? await compressImage(img) : ""
                     });
                 }
             }
 
+            // حفظ التقرير في داتابيز
             await fetch(`${REDIS_URL}/set/report:${reportId}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`}, body: JSON.stringify(report) });
             await fetch(`${REDIS_URL}/rpush/reports_list/${reportId}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`} });
 
-            emailjs.send("service_uu3h5on", "template_6dk4ib8", {
-                inspector: report.inspector, location: report.location, serial: report.serial, v_count: report.violations.length
-            }).finally(() => {
-                alert("✅ تم إرسال التقرير بنجاح!");
+            // إرسال الإيميل (تعديل المتغيرات لتطابق صورتك)
+            const templateParams = {
+                to_email: "rightwater156@gmail.com", // 👈 ضع إيميلك هنا لاستلام التقارير
+                to_name: "مدير السلامة",
+                inspector: report.inspector,
+                location: report.location,
+                report_date: report.report_date,
+                serial: report.serial,
+                order_id: report.job_order,
+                v_count: report.violations.length
+            };
+
+            emailjs.send("service_uu3h5on", "template_47r8gbr", templateParams)
+            .then(() => {
+                alert("✅ تم إرسال التقرير ووصل التنبيه للمدير!");
+                location.reload();
+            })
+            .catch((err) => {
+                alert("⚠️ التقرير حُفظ لكن فشل إرسال الإيميل");
+                console.error(err);
                 location.reload();
             });
 
-        } catch(err) { alert("❌ خطأ في الاتصال"); btn.disabled = false; }
+        } catch(err) { 
+            alert("❌ خطأ في الاتصال بقاعدة البيانات"); 
+            btn.disabled = false; 
+        }
     };
+
+    function logout() { sessionStorage.clear(); location.reload(); }
+    async function changeMyPass() {
+        const u = sessionStorage.getItem('inspector');
+        const np = prompt("أدخل كلمة السر الجديدة:");
+        if(np && np.length >= 4) {
+            await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`}, body:np });
+            alert("✅ تم التغيير");
+            logout();
+        }
+    }
 </script>
 </body>
 </html>
