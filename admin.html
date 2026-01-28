@@ -1,30 +1,39 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة المدير - الإدارة المركزية</title>
+    <title>لوحة التحكم - الشركة السعودية للكهرباء</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0a2e38; --gold: #c19a6b; --bg: #f1f5f9; }
+        :root { --sec-blue: #005a8f; --sec-orange: #f28b00; --bg: #f1f5f9; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 20px; }
-        .header { background: var(--primary); color: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 5px solid var(--gold); margin-bottom: 20px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: white; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        .search-box { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--primary); margin-bottom: 20px; outline: none; }
-        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-right: 5px solid var(--primary); }
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 5px; margin-top: 10px; }
-        .stat-item { padding: 4px; border-radius: 4px; font-size: 10px; text-align: center; color: white; }
+        body { background: var(--bg); margin: 0; padding: 0; }
+        
+        .admin-header { background: white; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 5px solid var(--sec-orange); box-shadow: 0 2px 10px rgba(0,0,0,0.1); sticky; top: 0; z-index: 1000; }
+        .admin-header img { height: 50px; }
+        .admin-title { color: var(--sec-blue); font-weight: bold; font-size: 18px; }
+
+        .tabs { display: flex; gap: 10px; padding: 20px; max-width: 1200px; margin: auto; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: white; color: var(--sec-blue); border: 1px solid #ddd; }
+        .tab-btn.active { background: var(--sec-blue); color: white; }
+
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .search-box { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; margin-bottom: 20px; outline: none; }
+        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-right: 6px solid var(--sec-blue); }
+        
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+        .stat-item { padding: 5px; border-radius: 5px; font-size: 11px; text-align: center; color: white; font-weight: bold; }
         .safe { background: #22c55e; } .danger { background: #ef4444; } .na { background: #94a3b8; }
-        .img-thumb { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 1px solid #ddd; margin-top: 5px; }
-        #imgModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; }
-        .btn { padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; margin-left: 5px; }
-        .btn-del { background: #ef4444; color: white; }
-        .btn-edit { background: #0078d4; color: white; }
-        .violation-card { margin-top:10px; border-right:3px solid var(--gold); padding:10px; background:#fafafa; border-radius:5px; }
-        @media print { .no-print { display: none !important; } .card { page-break-inside: avoid; border: 1px solid #ddd; } }
+
+        .v-card { margin-top: 15px; border: 1px solid #eee; padding: 15px; border-radius: 10px; background: #fffcf5; }
+        .img-thumb { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 2px solid #ddd; }
+        
+        #imgModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10001; align-items: center; justify-content: center; }
+        .btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-del { background: #fee2e2; color: #ef4444; }
+        .btn-print { background: var(--sec-blue); color: white; }
+        @media print { .no-print { display: none !important; } .card { border: 1px solid #ccc; page-break-inside: avoid; } }
     </style>
 </head>
 <body>
@@ -33,187 +42,148 @@
     <img id="modalImg" src="" style="max-width:90%; max-height:90%; border-radius:10px;">
 </div>
 
-<div class="header">
-    <h1>📊 لوحة التحكم والمتابعة</h1>
+<div class="admin-header">
+    <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/4/41/Saudi_Electricity_Company_logo.svg/1200px-Saudi_Electricity_Company_logo.svg.png">
+    <div class="admin-title">لوحة الرقابة المركزية 📊</div>
+    <button onclick="logout()" class="btn btn-del no-print">خروج</button>
 </div>
 
 <div class="tabs no-print">
     <button onclick="showTab('reps')" id="tR" class="tab-btn active">📋 التقارير</button>
     <button onclick="showTab('users')" id="tU" class="tab-btn">👥 المفتشين</button>
-    <button onclick="logout()" class="tab-btn" style="background:#ef4444; color:white">🚪 خروج</button>
 </div>
 
-<div id="viewReps">
-    <input type="text" id="searchInput" class="search-box no-print" placeholder="🔍 بحث سريع (مفتش، رقم تقرير، موقع، مهمة)..." oninput="runSearch()">
-    
-    <div class="no-print" style="margin-bottom:15px; text-align:right">
-        <button class="btn btn-del" onclick="deleteAllReports()">حذف جميع التقارير 🗑️</button>
+<div class="container">
+    <div id="viewReps">
+        <input type="text" id="searchInput" class="search-box no-print" placeholder="🔍 ابحث بالرقم، الموقع، أو المفتش..." oninput="runSearch()">
+        <div id="reportsList">جاري التحميل...</div>
     </div>
-
-    <div id="reportsList">جاري تحميل البيانات...</div>
-</div>
-
-<div id="viewUsers" style="display:none">
-    <div class="card no-print">
-        <h3>➕ إضافة مفتش جديد</h3>
-        <input type="text" id="nu" placeholder="اسم المفتش" style="padding:10px; border-radius:5px; border:1px solid #ddd">
-        <input type="text" id="np" placeholder="كلمة السر" style="padding:10px; border-radius:5px; border:1px solid #ddd">
-        <button onclick="addUser()" class="btn" style="background:var(--primary); color:white">إضافة ✅</button>
+    <div id="viewUsers" style="display:none">
+        <div class="card">
+            <h3>➕ إضافة مفتش جديد</h3>
+            <div style="display:flex; gap:10px">
+                <input type="text" id="nu" placeholder="اسم المستخدم">
+                <input type="text" id="np" placeholder="كلمة السر">
+                <button onclick="addUser()" class="btn btn-print">إضافة</button>
+            </div>
+        </div>
+        <div id="usersList"></div>
     </div>
-    <div id="usersList"></div>
 </div>
 
 <script>
-if(sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
-const REDIS_URL = "https://exact-parakeet-58043.upstash.io";
-const REDIS_TOKEN = "AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
+    const REDIS_URL = "https://exact-parakeet-58043.upstash.io";
+    const REDIS_TOKEN = "AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
+    let allReports = [];
 
-let allReports = [];
+    if(sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
 
-function showTab(t) {
-    document.getElementById('viewReps').style.display = t==='reps'?'block':'none';
-    document.getElementById('viewUsers').style.display = t==='users'?'block':'none';
-    document.getElementById('tR').className = t==='reps'?'tab-btn active':'tab-btn';
-    document.getElementById('tU').className = t==='users'?'tab-btn active':'tab-btn';
-    if(t==='users') loadUsers(); else fetchReports();
-}
+    function showTab(t) {
+        document.getElementById('viewReps').style.display = t==='reps'?'block':'none';
+        document.getElementById('viewUsers').style.display = t==='users'?'block':'none';
+        document.getElementById('tR').className = t==='reps'?'tab-btn active':'tab-btn';
+        document.getElementById('tU').className = t==='users'?'tab-btn active':'tab-btn';
+        if(t==='users') loadUsers(); else fetchReports();
+    }
 
-async function fetchReports() {
-    try {
-        const res = await fetch(`${REDIS_URL}/lrange/reports_list/0/-1`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        const ids = (await res.json()).result || [];
-        allReports = [];
-        for(let id of ids) {
-            const rRes = await fetch(`${REDIS_URL}/get/report:${id}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-            const rJson = await rRes.json();
-            if(rJson.result) allReports.push(JSON.parse(rJson.result));
-        }
-        runSearch();
-    } catch(e) { document.getElementById('reportsList').innerHTML = "خطأ في التحميل"; }
-}
+    async function fetchReports() {
+        try {
+            const res = await fetch(`${REDIS_URL}/lrange/reports_list/0/-1`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            const ids = (await res.json()).result || [];
+            allReports = [];
+            for(let id of ids) {
+                const rRes = await fetch(`${REDIS_URL}/get/report:${id}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+                const rJson = await rRes.json();
+                if(rJson.result) allReports.push(JSON.parse(rJson.result));
+            }
+            runSearch();
+        } catch(e) { document.getElementById('reportsList').innerHTML = "حدث خطأ في الاتصال"; }
+    }
 
-function runSearch() {
-    const term = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allReports.filter(r => 
-        (r.inspector || "").toLowerCase().includes(term) || 
-        (r.serial || "").toString().includes(term) ||
-        (r.location || "").toLowerCase().includes(term) ||
-        (r.job_order || "").toLowerCase().includes(term)
-    );
-    const area = document.getElementById('reportsList'); area.innerHTML = "";
-    filtered.reverse().forEach(r => {
-        let statusHtml = "";
-        // عرض حالة الـ 47 بند (أو حسب طول مصفوفة الأجوبة)
-        Object.keys(r.answers).forEach(key => {
-            let ans = r.answers[key];
-            let cls = ans === 'نعم' ? 'safe' : (ans === 'لا' ? 'danger' : 'na');
-            statusHtml += `<div class="stat-item ${cls}">بند ${key}: ${ans}</div>`;
-        });
-
-        let vHtml = "";
-        if(r.violations && r.violations.length > 0) {
-            r.violations.forEach(v => {
+    function runSearch() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allReports.filter(r => 
+            (r.inspector || "").toLowerCase().includes(term) || (r.serial || "").toString().includes(term) || (r.location || "").toLowerCase().includes(term)
+        );
+        const area = document.getElementById('reportsList'); area.innerHTML = "";
+        filtered.reverse().forEach(r => {
+            let statusHtml = "";
+            Object.keys(r.answers).forEach(key => {
+                let ans = r.answers[key];
+                let cls = ans === 'نعم' ? 'safe' : (ans === 'لا' ? 'danger' : 'na');
+                statusHtml += `<div class="stat-item ${cls}">بند ${key}: ${ans}</div>`;
+            });
+            let vHtml = "";
+            (r.violations || []).forEach(v => {
                 vHtml += `
-                <div class="violation-card">
-                    <b>بند ${v.id}: ${v.q}</b> <span style="background:#eee; padding:2px 5px; border-radius:4px; font-size:12px">${v.ans || ""}</span><br>
-                    <span style="color:#0a2e38">📝 الملاحظة: ${v.note || "لا توجد"}</span><br>
+                <div class="v-card">
+                    <b style="color:var(--sec-blue)">📍 بند ${v.id}: ${v.q}</b> <span style="float:left">${v.ans}</span>
+                    <p>📝 الملاحظة: ${v.note || "بدون ملاحظة"}</p>
                     ${v.photo ? `<img src="${v.photo}" class="img-thumb" onclick="openImg(this.src)">` : ""}
                 </div>`;
             });
-        }
-
-        area.innerHTML += `
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px">
-                    <b>📄 تقرير #${r.serial}</b><span>🕒 ${r.timestamp}</span>
-                </div>
-                <p>👷 المفتش: <b>${r.inspector}</b> | 📍 الموقع: ${r.location} | 📄 المهمة: ${r.job_order}</p>
-                <details class="no-print"><summary style="cursor:pointer; color:var(--primary)">👁️ عرض ملخص البنود</summary>
+            area.innerHTML += `
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:10px">
+                        <b>📄 تقرير #${r.serial}</b><span>🕒 ${r.timestamp}</span>
+                    </div>
+                    <p>👷 المفتش: <b>${r.inspector}</b> | 📍 الموقع: ${r.location} | 📄 المهمة: ${r.job_order}</p>
+                    <details class="no-print"><summary style="cursor:pointer; color:var(--sec-orange)">👁️ ملخص جميع البنود</summary>
                     <div class="status-grid">${statusHtml}</div></details>
-                <div style="margin-top:10px">
-                    <h4 style="margin-bottom:5px; border-bottom:1px solid #ddd">المرفقات والملاحظات:</h4>
-                    ${vHtml || "<p style='color:gray'>لا توجد ملاحظات أو صور مرفقة</p>"}
-                </div>
-                <div class="no-print" style="margin-top:15px">
-                    <button class="btn btn-edit" onclick="window.print()">طباعة 🖨️</button>
-                    <button class="btn btn-del" onclick="deleteRep('${r.serial}')">حذف 🗑️</button>
-                </div>
-            </div>`;
-    });
-}
-
-function openImg(s) { document.getElementById('modalImg').src = s; document.getElementById('imgModal').style.display = 'flex'; }
-function logout() { sessionStorage.clear(); window.location.href='index.html'; }
-
-async function deleteRep(id) {
-    if(confirm("حذف التقرير؟")) {
-        await fetch(`${REDIS_URL}/del/report:${id}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        await fetch(`${REDIS_URL}/lrem/reports_list/0/${id}`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        fetchReports();
+                    <div style="margin-top:10px">
+                        <h4 style="margin-bottom:10px; color:var(--sec-blue)">المرفقات والملاحظات:</h4>
+                        ${vHtml || "لا توجد مرفقات"}
+                    </div>
+                    <div class="no-print" style="margin-top:15px">
+                        <button class="btn btn-print" onclick="window.print()">طباعة 🖨️</button>
+                        <button class="btn btn-del" onclick="deleteRep('${r.serial}')">حذف 🗑️</button>
+                    </div>
+                </div>`;
+        });
     }
-}
 
-async function deleteAllReports(){
-    if(!confirm("⚠️ هل أنت متأكد من حذف جميع التقارير؟ لا يمكن التراجع!")) return;
-    try {
-        const res = await fetch(`${REDIS_URL}/lrange/reports_list/0/-1`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        const ids = (await res.json()).result || [];
-        for(let id of ids){ await fetch(`${REDIS_URL}/del/report:${id}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } }); }
-        await fetch(`${REDIS_URL}/del/reports_list`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        alert("✅ تم حذف جميع التقارير بنجاح");
-        fetchReports();
-    } catch(err){ alert("❌ حدث خطأ أثناء حذف التقارير"); }
-}
+    function openImg(s) { document.getElementById('modalImg').src = s; document.getElementById('imgModal').style.display = 'flex'; }
+    function logout() { sessionStorage.clear(); window.location.href='index.html'; }
 
-function togglePw(u, realPw) {
-    const el = document.getElementById(`pw-${u}`);
-    if(el.innerText === '••••••') el.innerText = realPw;
-    else el.innerText = '••••••';
-}
+    async function deleteRep(id) {
+        if(confirm("حذف التقرير؟")) {
+            await fetch(`${REDIS_URL}/del/report:${id}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            await fetch(`${REDIS_URL}/lrem/reports_list/0/${id}`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            fetchReports();
+        }
+    }
 
-async function loadUsers() {
-    const res = await fetch(`${REDIS_URL}/smembers/inspectors`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-    const users = (await res.json()).result || [];
-    const area = document.getElementById('usersList'); area.innerHTML = "";
-    for(let u of users) {
-        const pRes = await fetch(`${REDIS_URL}/get/user:${u}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        const pData = await pRes.json();
-        area.innerHTML += `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-right-color:var(--gold)">
-                <span>👤 المفتش: <b>${u}</b> | 🔑 السر: 
-                    <b id="pw-${u}" style="color:blue">••••••</b>
-                    <button class="btn" style="padding:3px 6px; font-size:10px" onclick="togglePw('${u}','${pData.result}')">👁️</button>
-                </span>
-                <div>
-                    <button class="btn btn-edit" onclick="editPass('${u}')">تعديل السر 🔑</button>
+    async function loadUsers() {
+        const res = await fetch(`${REDIS_URL}/smembers/inspectors`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+        const users = (await res.json()).result || [];
+        const area = document.getElementById('usersList'); area.innerHTML = "";
+        for(let u of users) {
+            const pRes = await fetch(`${REDIS_URL}/get/user:${u}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            const pData = await pRes.json();
+            area.innerHTML += `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>👤 المفتش: <b>${u}</b> | 🔑 السر: <b style="color:var(--sec-blue)">${pData.result}</b></span>
                     <button class="btn btn-del" onclick="delUser('${u}')">حذف 🗑️</button>
-                </div>
-            </div>`;
+                </div>`;
+        }
     }
-}
 
-async function editPass(u) {
-    const np = prompt("كلمة السر الجديدة لـ " + u);
-    if(np) { await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: np }); loadUsers(); }
-}
-
-async function addUser() {
-    const u = document.getElementById('nu').value; const p = document.getElementById('np').value;
-    if(!u || !p) return;
-    await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: p });
-    await fetch(`${REDIS_URL}/sadd/inspectors`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: u });
-    alert("تمت الإضافة"); loadUsers();
-}
-
-async function delUser(u) {
-    if(confirm("حذف المفتش؟")) {
-        await fetch(`${REDIS_URL}/del/user:${u}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
-        await fetch(`${REDIS_URL}/srem/inspectors`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: u });
-        loadUsers();
+    async function addUser() {
+        const u = nu.value; const p = np.value;
+        if(!u || !p) return;
+        await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: p });
+        await fetch(`${REDIS_URL}/sadd/inspectors`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: u });
+        nu.value=""; np.value=""; loadUsers();
     }
-}
 
-fetchReports();
+    async function delUser(u) {
+        if(confirm("حذف المفتش؟")) {
+            await fetch(`${REDIS_URL}/del/user:${u}`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            await fetch(`${REDIS_URL}/srem/inspectors`, { method:'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` }, body: u });
+            loadUsers();
+        }
+    }
+    fetchReports();
 </script>
 </body>
 </html>
