@@ -6,6 +6,10 @@
     <title>لوحة الرقابة - المشرف</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- مكتبة التحميل المباشر للـ PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         :root { --main-blue: #005a8f; --main-orange: #f28b00; --bg: #f3f4f6; --text: #1f2937; --danger: #ef4444; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; outline: none; }
@@ -15,20 +19,7 @@
         .header { background: white; padding: 15px 20px; border-bottom: 4px solid var(--main-orange); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
         .logo-box { display: flex; align-items: center; gap: 10px; }
         .logo-box img { height: 50px; }
-        
-        /* الصندوق المدمج (التعديل الجديد) */
-        .dept-badge { 
-            border: 2px solid var(--main-blue); 
-            color: var(--main-blue); 
-            padding: 8px 15px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            font-size: 12px; 
-            text-align: center; 
-            background: #f0f9ff; 
-            line-height: 1.6;
-        }
-        
+        .dept-badge { border: 2px solid var(--main-blue); color: var(--main-blue); padding: 5px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; text-align: center; background: #f0f9ff; line-height: 1.5; }
         .btn-logout { background: #fee2e2; color: #dc2626; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
         /* التبويبات */
@@ -44,30 +35,23 @@
         /* الكروت */
         .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #e5e7eb; position: relative; overflow: hidden; }
         
-        /* قسم المخالفات والملاحظات (التعديل الجديد) */
-        .violations-box { 
-            background: #fff5f5; 
-            border: 1px solid #feb2b2; 
-            border-radius: 10px; 
-            padding: 15px; 
-            margin: 15px 0; 
-        }
+        /* المخالفات */
+        .violations-box { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 10px; padding: 15px; margin: 15px 0; }
         .v-title { color: #991b1b; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; font-size: 14px; }
-        .v-item { background: white; padding: 10px; border-radius: 8px; border: 1px solid #fed7aa; margin-bottom: 8px; }
+        .v-item { background: white; padding: 10px; border-radius: 8px; border: 1px solid #fed7aa; margin-bottom: 8px; position: relative; }
+        .v-btns { position: absolute; left: 10px; top: 10px; display: flex; gap: 5px; }
+        .btn-mini { border: none; padding: 5px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 3px; }
+        .btn-pdf { background: #fee2e2; color: #b91c1c; }
         .v-note { font-size: 13px; color: #333; margin-top: 5px; background: #fffbeb; padding: 5px; border-radius: 5px; border-right: 3px solid var(--main-orange); }
         .v-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-top: 5px; cursor: pointer; border: 2px solid #eee; }
 
         /* تفاصيل الكارت */
+        .report-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #e5e7eb; padding-bottom: 10px; margin-bottom: 10px; }
         .r-serial { font-weight: 800; font-size: 18px; color: #111; }
         .r-meta { font-size: 12px; color: #6b7280; }
         .data-row { font-size: 14px; margin-bottom: 6px; color: #4b5563; display: flex; align-items: center; gap: 6px; }
 
-        /* مودال عرض الصورة */
-        #imgModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
-        #imgModal img { max-width: 95%; max-height: 80vh; border-radius: 8px; }
-        .close-modal { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
-
-        /* الأزرار والإدخال */
+        /* عناصر التحكم */
         .eye-btn { width: 100%; background: #f0f9ff; color: var(--main-blue); border: 1px solid #bae6fd; padding: 10px; margin-top: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .details-panel { display: none; background: #fafafa; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #eee; }
         .ans-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; gap: 10px; }
@@ -75,21 +59,26 @@
         .val-yes { background: #dcfce7; color: #166534; }
         .val-no { background: #fee2e2; color: #991b1b; }
         
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 15px; position: relative; }
         .custom-input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; background: white; }
+        .eye-pos { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6b7280; font-size: 18px; }
         .btn-save { width: 100%; background: var(--main-blue); color: white; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-
-        /* قائمة المفتشين */
         .inspector-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; border-bottom: 1px solid #eee; }
+
+        #tempRender { position: fixed; top: -9999px; left: -9999px; width: 600px; background: white; z-index: -1; }
+        #imgModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+        #imgModal img { max-width: 95%; max-height: 80vh; border-radius: 8px; }
+        .close-modal { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- نافذة تكبير الصورة -->
 <div id="imgModal" onclick="this.style.display='none'">
     <span class="close-modal">&times;</span>
     <img id="modalImg" src="">
 </div>
+<!-- حاوية مؤقتة للطباعة -->
+<div id="tempRender"></div>
 
 <div class="header">
     <div class="logo-box">
@@ -99,11 +88,7 @@
             <div style="font-size:11px; color:var(--main-orange);">إدارة ضواحي الرياض</div>
         </div>
     </div>
-    <!-- التعديل هنا: دمج النصين في صندوق واحد -->
-    <div class="dept-badge">
-        مجموعة السلامة<br>
-        إدارة ضواحي الرياض
-    </div>
+    <div class="dept-badge">مجموعة السلامة<br>إدارة ضواحي الرياض</div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> خروج</button>
 </div>
 
@@ -113,8 +98,6 @@
 </div>
 
 <div class="container">
-
-    <!-- قسم التقارير -->
     <div id="reports" class="section active">
         <div style="position:relative; margin-bottom:20px;">
             <i class="fa-solid fa-magnifying-glass" style="position:absolute; right:15px; top:12px; color:#999"></i>
@@ -123,12 +106,16 @@
         <div id="reportsList">جاري التحميل...</div>
     </div>
 
-    <!-- قسم المفتشين -->
     <div id="inspectors" class="section">
         <div class="card">
             <h3 style="color:var(--main-blue); margin-bottom:15px">➕ إضافة مفتش جديد</h3>
-            <div class="input-group"><input id="newInspectorName" class="custom-input" placeholder="اسم المفتش"></div>
-            <div class="input-group"><input id="newInspectorPass" class="custom-input" placeholder="كلمة السر"></div>
+            <div class="input-group">
+                <input id="newInspectorName" class="custom-input" placeholder="اسم المفتش">
+            </div>
+            <div class="input-group">
+                <input id="newInspectorPass" type="password" class="custom-input" placeholder="كلمة السر">
+                <i class="fa-regular fa-eye eye-pos" onclick="togglePass('newInspectorPass', this)"></i>
+            </div>
             <button class="btn-save" onclick="addInspector()">حفظ المفتش</button>
         </div>
         <div class="card">
@@ -136,69 +123,14 @@
             <div id="usersListContainer"></div>
         </div>
     </div>
-
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const REDIS_URL = "https://exact-parakeet-58043.upstash.io";
 const REDIS_TOKEN = "AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
 
-// القائمة الكاملة
 const fullQuestionsList = [
-    "تصريح العمل الأساسي والثانوي متواجد بموقع العمل",
-    "اجتماع ما قبل البدء بالعمل متواجد بموقع العمل",
-    "نموذج فريق العمل متواجد بموقع العمل (مذكور رقم المقايسة – وصف العمل – رقم التصريح – توقيع مشرف الكهرب والشركة)",
-    "إجراءات العمل الآمن وتقييم المخاطر وتوفرها بلغات مناسبة",
-    "إلمام المستلم وفريق العمل بإجراءات العمل الآمن وتقييم المخاطر للمهمة",
-    "ملاحظات",
-    "بطاقة تعميد المصدر والمستلم والعامل المشارك سارية وبصلاحيات مناسبة للعمل",
-    "تأهيل سائق المعدات (سائق ونش – سلة هوائية -........)",
-    "المستلم متواجد بموقع العمل",
-    "وضع أقفال السلامة و البطاقات التحذيرية و إكتمال بيانات التواصل",
-    "التأكد من تركيب الأرضي المتنقل من الجهتين",
-    "التأكد من فعالية جهاز كشف الجهد التستر",
-    "التأكد من تواجد نموذج فحص المركبة والعدد والادوات متواجد شهادة المسعف والمكافح وفحص المركبة والباركود الخاص بالخطط",
-    "نماذج الفحص",
-    "نموذج فحص المركبة",
-    "نموذج فحص العدد والادوات",
-    "شهادة المسعف",
-    "شهادة المكافح",
-    "شهادة tuv",
-    "QR Code",
-    "فحص معدات الرفع و الحفر من قبل طرف ثالث (تى يو فى)",
-    "التأكد من مطابقة السلات للمواصفات ( كفرات – زيوت – كسور – حزام الأمان – تكدس مواد .. الخ)",
-    "التأكد من سلامة خطاف الونش واحبال الرفع",
-    "طفاية حريق سليمة ومفحوصة وسلامة استكر الفحص",
-    "شنطة إسعافات مكتملة ومفحوصة",
-    "التأكد من تركيب الأرضي للسيارات",
-    "الحمل الأقصى محدد بوضوح على جميع معدات الرفع",
-    "مهام الوقاية الشخصية سليمة (بسؤال الموظف والتفتيش علية) خوذة - ملابس – حذاء",
-    "التفتيش على القفاز المطاطي (33000 – 13000 – 1000) ك.ف.أ",
-    "الخوذة الكهربائية مزودة بحامى وجة",
-    "أحزمة السلامة مرقمة وسليمة",
-    "استخدام حواجز حماية سليمة وكافية و شريط تحذيري",
-    "كفاية اللوحات الإرشادية المرورية",
-    "الترميز بالألوان حسب الشهر للعدد والأدوات وأدوات السلامة",
-    "تخزين أسطوانات الغاز وأسطوانات الاكسجين واللحام وترميزها",
-    "وجود أغطية الحماية لأسطوانات الغاز والأكسجين",
-    "ليات الاوكسي استيلين لا يوجد بها تشققات او تالفة",
-    "سلامة المنظم والعدادات",
-    "وجود شعار المقاول على المركبات والمعدات",
-    "تم ازالة المخلفات بعد الانتهاء من العمل",
-    "خطط متعلقة بتصاريح العمل",
-    "خطة الطوارئ",
-    "خطة المنع من السقوط",
-    "خطة الإنقاذ في العمل على المرتفعات",
-    "خطة رفع الأحمال الحرجة",
-    "إجراء وملصقات حماية السمع",
-    "ملصقات العمل على مرتفعات اوملصق أغراض متساقطة",
-    "التأكد من خطاف الونش واحبال الرفع",
-    "الحمل الأقصى محدد بوضوح على جميع معدات الرفع",
-    "مهام الوقاية الشخصية سليمة (بسؤال الموظف والتفتيش علية) خوذة - ملابس – حذاء",
-    "التفتيش على القفاز المطاطي (33000 – 13000 – 1000) ك.ف.أ",
-    "الخوذة الكهربائية مزودة بحامى وجة",
-    "أحزمة السلامة مرقمة وسليمة"
+    "تصريح العمل الأساسي والثانوي متواجد بموقع العمل", "اجتماع ما قبل البدء بالعمل متواجد بموقع العمل", "نموذج فريق العمل متواجد بموقع العمل (مذكور رقم المقايسة – وصف العمل – رقم التصريح – توقيع مشرف الكهرب والشركة)", "إجراءات العمل الآمن وتقييم المخاطر وتوفرها بلغات مناسبة", "إلمام المستلم وفريق العمل بإجراءات العمل الآمن وتقييم المخاطر للمهمة", "ملاحظات", "بطاقة تعميد المصدر والمستلم والعامل المشارك سارية وبصلاحيات مناسبة للعمل", "تأهيل سائق المعدات (سائق ونش – سلة هوائية -........)", "المستلم متواجد بموقع العمل", "وضع أقفال السلامة و البطاقات التحذيرية و إكتمال بيانات التواصل", "التأكد من تركيب الأرضي المتنقل من الجهتين", "التأكد من فعالية جهاز كشف الجهد التستر", "التأكد من تواجد نموذج فحص المركبة والعدد والادوات متواجد شهادة المسعف والمكافح وفحص المركبة والباركود الخاص بالخطط", "نماذج الفحص", "نموذج فحص المركبة", "نموذج فحص العدد والادوات", "شهادة المسعف", "شهادة المكافح", "شهادة tuv", "QR Code", "فحص معدات الرفع و الحفر من قبل طرف ثالث (تى يو فى)", "التأكد من مطابقة السلات للمواصفات ( كفرات – زيوت – كسور – حزام الأمان – تكدس مواد .. الخ)", "التأكد من سلامة خطاف الونش واحبال الرفع", "طفاية حريق سليمة ومفحوصة وسلامة استكر الفحص", "شنطة إسعافات مكتملة ومفحوصة", "التأكد من تركيب الأرضي للسيارات", "الحمل الأقصى محدد بوضوح على جميع معدات الرفع", "مهام الوقاية الشخصية سليمة (بسؤال الموظف والتفتيش علية) خوذة - ملابس – حذاء", "التفتيش على القفاز المطاطي (33000 – 13000 – 1000) ك.ف.أ", "الخوذة الكهربائية مزودة بحامى وجة", "أحزمة السلامة مرقمة وسليمة", "استخدام حواجز حماية سليمة وكافية و شريط تحذيري", "كفاية اللوحات الإرشادية المرورية", "الترميز بالألوان حسب الشهر للعدد والأدوات وأدوات السلامة", "تخزين أسطوانات الغاز وأسطوانات الاكسجين واللحام وترميزها", "وجود أغطية الحماية لأسطوانات الغاز والأكسجين", "ليات الاوكسي استيلين لا يوجد بها تشققات او تالفة", "سلامة المنظم والعدادات", "وجود شعار المقاول على المركبات والمعدات", "تم ازالة المخلفات بعد الانتهاء من العمل", "خطط متعلقة بتصاريح العمل", "خطة الطوارئ", "خطة المنع من السقوط", "خطة الإنقاذ في العمل على المرتفعات", "خطة رفع الأحمال الحرجة", "إجراء وملصقات حماية السمع", "ملصقات العمل على مرتفعات اوملصق أغراض متساقطة", "التأكد من خطاف الونش واحبال الرفع", "الحمل الأقصى محدد بوضوح على جميع معدات الرفع", "مهام الوقاية الشخصية سليمة (بسؤال الموظف والتفتيش علية) خوذة - ملابس – حذاء", "التفتيش على القفاز المطاطي (33000 – 13000 – 1000) ك.ف.أ", "الخوذة الكهربائية مزودة بحامى وجة", "أحزمة السلامة مرقمة وسليمة"
 ];
 
 let allReports = [];
@@ -234,18 +166,21 @@ function renderReports(){
     if(!filtered.length){ list.innerHTML="<p style='text-align:center'>لا توجد تقارير</p>"; return; }
 
     filtered.forEach(r=>{
-        // 🔴 منطق المخالفات المحدث: إظهار أي بند له ملاحظة أو صورة أو إجابة "لا"
         let violationsHtml = '';
         if(r.violations && r.violations.length > 0) {
             violationsHtml = `<div class="violations-box"><div class="v-title"><i class="fa-solid fa-triangle-exclamation"></i> الملاحظات والمخالفات المرصودة:</div>`;
-            r.violations.forEach(v => {
+            r.violations.forEach((v, i) => {
                 const note = v.note ? `<div class="v-note">📝 ${v.note}</div>` : '';
-                // إضافة onclick لتكبير الصورة
                 const img = v.photo ? `<br><img src="${v.photo}" class="v-img" onclick="showImg('${v.photo}')">` : '';
                 
                 violationsHtml += `
                 <div class="v-item">
-                    <div style="font-weight:bold; font-size:13px; margin-bottom:5px;">🔹 ${v.q}</div>
+                    <div class="v-btns">
+                         <button class="btn-mini btn-pdf" onclick="downloadSingleViolation('${r.serial}', '${v.q}', '${v.ans}', '${v.note||''}', '${v.photo||''}')">
+                            <i class="fa-solid fa-download"></i> تحميل
+                        </button>
+                    </div>
+                    <div style="font-weight:bold; font-size:13px; margin-bottom:5px; padding-left:60px;">🔹 ${v.q}</div>
                     <span class="${v.ans==='نعم'?'val-yes':'val-no'}" style="padding:2px 8px; border-radius:10px; font-size:11px;">${v.ans}</span>
                     ${note}
                     ${img}
@@ -271,8 +206,12 @@ function renderReports(){
             <div class="details-panel" id="panel-${r.serial}"></div>
 
             <div style="display:flex; gap:10px; margin-top:15px">
-                <button onclick="delRep(${r.serial})" style="flex:1; background:#fee2e2; color:#b91c1c; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">حذف</button>
-                <button onclick="printRep(${r.serial})" style="flex:1; background:#e0f2fe; color:#0369a1; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">طباعة</button>
+                <button onclick="delRep(${r.serial})" style="flex:1; background:#fee2e2; color:#b91c1c; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    <i class="fa-solid fa-trash-can"></i> حذف
+                </button>
+                <button onclick="downloadFullReport('${r.serial}')" style="flex:2; background:#005a8f; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    <i class="fa-solid fa-download"></i> تحميل PDF مباشر ⬇️
+                </button>
             </div>
         </div>`;
     });
@@ -298,6 +237,138 @@ function showImg(src){
     document.getElementById('imgModal').style.display = 'flex';
 }
 
+// ----------------------------------------------------
+// دالة التحميل المباشر للتقرير الكامل باستخدام html2pdf
+// ----------------------------------------------------
+function downloadFullReport(serial) {
+    const r = allReports.find(x => x.serial == serial);
+    const container = document.getElementById('tempRender');
+    
+    // بناء المحتوى (نفس التصميم الاحترافي)
+    let tableRows = '';
+    fullQuestionsList.forEach((q, i) => {
+        const ans = r.answers && r.answers[i+1] ? r.answers[i+1] : "N/A";
+        let icon = "⚪"; let color = "#666";
+        if(ans === "نعم") { icon = "☑️"; color = "#16a34a"; }
+        if(ans === "لا") { icon = "❎"; color = "#dc2626"; }
+        // صفوف الجدول
+        tableRows += `
+        <tr style="border-bottom:1px solid #eee; page-break-inside:avoid;">
+            <td style="padding:8px; border-left:1px solid #eee; text-align:center; width:50px;">${i+1}</td>
+            <td style="padding:8px; border-left:1px solid #eee; text-align:right;">${q}</td>
+            <td style="padding:8px; text-align:center; color:${color}; width:80px; font-weight:bold; font-size:13px;">${icon} ${ans}</td>
+        </tr>`;
+    });
+
+    let violationsHTML = '';
+    if(r.violations && r.violations.length > 0) {
+        let vCards = '';
+        r.violations.forEach(v => {
+            vCards += `
+            <div style="background:#fff; border:1px solid #ffcccc; margin-bottom:10px; display:flex; padding:10px; gap:15px; page-break-inside:avoid;">
+                ${v.photo ? `<div style="width:120px; flex-shrink:0;"><img src="${v.photo}" style="width:100%; border-radius:4px;"></div>` : ''}
+                <div style="flex:1;">
+                    <div style="color:#b91c1c; font-weight:bold; font-size:13px; margin-bottom:5px;">⚠️ ${v.q}</div>
+                    <div style="font-size:12px; margin-bottom:5px;"><b>الحالة:</b> <span style="color:red;">${v.ans}</span></div>
+                    ${v.note ? `<div style="background:#fff5f5; padding:5px; border:1px dashed #ffa6a6; font-size:11px;">${v.note}</div>` : ''}
+                </div>
+            </div>`;
+        });
+        violationsHTML = `<div style="background:#ffecec; border:1px solid #ffb3b3; color:#991b1b; padding:8px 15px; font-weight:bold; margin:20px 0 10px 0;">🚩 الملاحظات والمخالفات المرصودة</div>${vCards}`;
+    }
+
+    // تصميم الصفحة
+    const content = `
+    <div style="font-family:'Cairo',sans-serif; padding:20px; direction:rtl; background:white; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid #f28b00; padding-bottom:15px; margin-bottom:20px;">
+            <div>
+                <h2 style="color:#005a8f; margin:0 0 5px 0; font-size:22px;">الشركة السعودية للكهرباء</h2>
+                <p style="margin:0; color:#666; font-size:13px;">نظام إدارة السلامة الميداني - تقرير تفتيش</p>
+            </div>
+            <img src="imeg/imge.jpg" style="height:60px;">
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:15px; font-size:12px;">
+            <div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">رقم التقرير</span> <span>${r.serial}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">الموقع</span> <span>${r.location}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">المستلم</span> <span>${r.receiver_name}</span></div>
+            </div>
+            <div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">التاريخ</span> <span>${r.timestamp}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">المفتش</span> <span>${r.inspector}</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #f1f1f1; padding:6px 0;"><span style="color:#005a8f; font-weight:bold;">المشرف</span> <span>${r.supervisor_name}</span></div>
+            </div>
+        </div>
+
+        ${violationsHTML}
+
+        <div style="background:#005a8f; color:white; padding:8px 15px; font-weight:bold; margin-top:20px;">📋 قائمة التحقق (53 بند)</div>
+        <table style="width:100%; border-collapse:collapse; font-size:12px; border:1px solid #ddd;">
+            <thead style="display:table-header-group;">
+                <tr style="background:#f1f5f9; color:#005a8f; border-bottom:2px solid #005a8f;">
+                    <th style="padding:10px; width:50px;">#</th>
+                    <th style="padding:10px; text-align:right;">البند</th>
+                    <th style="padding:10px; width:80px;">النتيجة</th>
+                </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; margin-top:30px; border-top:2px solid #eee; padding-top:20px; text-align:center; page-break-inside:avoid;">
+            <div style="width:30%;">
+                <div style="font-weight:bold; color:#005a8f; margin-bottom:10px;">توقيع المفتش</div>
+                <div>${r.inspector}</div>
+            </div>
+            <div style="width:30%;">
+                <div style="font-weight:bold; color:#005a8f; margin-bottom:10px;">توقيع المستلم</div>
+                <div>${r.receiver_name}</div>
+            </div>
+             <div style="width:30%;">
+                <div style="font-weight:bold; color:#005a8f; margin-bottom:10px;">الاعتماد</div>
+                <div>_________________</div>
+            </div>
+        </div>
+    </div>`;
+
+    container.innerHTML = content;
+    
+    // إعدادات html2pdf
+    const opt = {
+        margin:       [10, 10, 10, 10], // هوامش الصفحة
+        filename:     `report_${r.serial}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // البدء في التحميل
+    html2pdf().set(opt).from(container.firstElementChild).save().then(()=>{
+        container.innerHTML = ''; // تنظيف بعد التحميل
+    });
+}
+
+function downloadSingleViolation(serial, q, ans, note, photo){
+    const container = document.getElementById('tempRender');
+    container.innerHTML = `
+    <div style="padding:20px; background:white; border:2px solid #b91c1c; border-radius:10px; direction:rtl; font-family:'Cairo', sans-serif;">
+        <h3 style="color:#b91c1c; text-align:center;">⚠️ إشعار مخالفة #${serial}</h3>
+        <p><b>البند:</b> ${q}</p>
+        <p><b>الحالة:</b> <span style="color:red; font-weight:bold">${ans}</span></p>
+        <div style="background:#fef2f2; padding:10px; border:1px solid #f87171; margin-top:10px;"><b>ملاحظات:</b><br>${note||'لا يوجد'}</div>
+        ${photo ? `<div style="text-align:center; margin-top:10px;"><img src="${photo}" style="max-width:100%; border-radius:8px;"></div>` : ''}
+    </div>`;
+    
+    const opt = {
+        margin: 10,
+        filename: `violation_${serial}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(container.firstElementChild).save().then(()=>{ container.innerHTML=''; });
+}
+
 async function loadUsers(){
     const list = document.getElementById('usersListContainer');
     list.innerHTML='تحميل...';
@@ -311,10 +382,24 @@ async function loadUsers(){
         <div class="inspector-row">
             <div><b>👤 ${n}</b></div>
             <div style="display:flex; align-items:center; gap:10px">
-                <input type="password" value="${p}" readonly style="border:none; background:none; width:60px" onclick="this.type='text'">
+                <input type="password" value="${p}" readonly style="border:none; background:none; width:60px" id="passlist_${n}">
+                <i class="fa-regular fa-eye" style="cursor:pointer; color:#666" onclick="togglePass('passlist_${n}', this)"></i>
                 <button onclick="delUser('${n}')" style="background:#fee2e2; color:red; border:none; padding:5px 10px; border-radius:5px; cursor:pointer">حذف</button>
             </div>
         </div>`;
+    }
+}
+
+function togglePass(id, icon) {
+    const inp = document.getElementById(id);
+    if(inp.type === "password") {
+        inp.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        inp.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
     }
 }
 
@@ -323,6 +408,7 @@ async function addInspector(){
     if(!n||!p) return alert('أكمل البيانات');
     await fetch(`${REDIS_URL}/set/user:${n}`,{method:'POST',headers:{Authorization:`Bearer ${REDIS_TOKEN}`},body:p});
     alert('تم'); loadUsers();
+    newInspectorName.value=''; newInspectorPass.value='';
 }
 
 async function delUser(n){
@@ -336,14 +422,6 @@ async function delRep(s){
         await fetch(`${REDIS_URL}/lrem/reports_list/0/${s}`,{method:'POST',headers:{Authorization:`Bearer ${REDIS_TOKEN}`}});
         fetchReports();
     }
-}
-
-function printRep(s){
-    const r = allReports.find(x=>x.serial==s);
-    let rows = "";
-    r.violations.forEach(v=>{ rows+=`<tr><td>${v.q}</td><td>${v.ans}</td><td>${v.note||''} ${v.photo?'(صورة)':''}</td></tr>`; });
-    const w = window.open('','','width=800,height=800');
-    w.document.write(`<h2 style="text-align:center">تقرير #${s}</h2><table border="1" style="width:100%; direction:rtl; border-collapse:collapse"><tr><th>البند</th><th>الحالة</th><th>ملاحظات</th></tr>${rows}</table><script>window.print()<\/script>`);
 }
 
 function logout(){ sessionStorage.clear(); location.href='trs.html'; }
