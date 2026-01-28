@@ -21,7 +21,7 @@
         .search-box { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #ddd; margin-bottom: 20px; outline: none; }
         .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-right: 6px solid var(--sec-blue); }
         
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 5px; margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 5px; margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
         .stat-item { padding: 4px; border-radius: 4px; font-size: 9px; text-align: center; color: white; font-weight: bold; }
         .safe { background: #22c55e; } .danger { background: #ef4444; } .na { background: #94a3b8; }
 
@@ -32,7 +32,15 @@
         .btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
         .btn-del { background: #fee2e2; color: #ef4444; }
         .btn-print { background: var(--sec-blue); color: white; }
-        @media print { .no-print { display: none !important; } .card { border: 1px solid #ccc; page-break-inside: avoid; } details { display: block !important; } }
+        
+        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+
+        @media print { 
+            .no-print { display: none !important; } 
+            .card { border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 10px; } 
+            details { display: block !important; }
+            summary { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -42,32 +50,38 @@
 <div class="admin-header">
     <div style="display:flex; align-items:center; gap:10px;">
         <img src="imeg/imge.jpg" style="height:45px">
-        <b style="color:var(--sec-blue)">لوحة الرقابة</b>
+        <b style="color:var(--sec-blue)">لوحة الرقابة والأرشفة</b>
     </div>
     <div class="header-left-box">مجموعة السلامة<br>إدارة ضواحي الرياض</div>
     <button onclick="logout()" class="btn btn-del no-print">خروج</button>
 </div>
 
 <div class="tabs no-print">
-    <button onclick="showTab('reps')" id="tR" class="tab-btn active">📋 التقارير</button>
-    <button onclick="showTab('users')" id="tU" class="tab-btn">👥 المفتشين</button>
+    <button onclick="showTab('reps')" id="tR" class="tab-btn active">📋 التقارير الميدانية</button>
+    <button onclick="showTab('users')" id="tU" class="tab-btn">👥 إدارة المفتشين</button>
 </div>
 
 <div class="container">
+    <!-- قسم التقارير -->
     <div id="viewReps">
         <input type="text" id="searchInput" class="search-box no-print" placeholder="🔍 ابحث بالموقع، المفتش، أو رقم أمر العمل..." oninput="runSearch()">
-        <div id="reportsList">جاري التحميل...</div>
+        <div id="reportsList">جاري تحميل التقارير...</div>
     </div>
+
+    <!-- قسم المستخدمين -->
     <div id="viewUsers" style="display:none">
         <div class="card">
-            <h3>➕ إضافة مفتش جديد</h3>
-            <div style="display:flex; gap:10px">
-                <input type="text" id="nu" placeholder="اسم المستخدم">
-                <input type="text" id="np" placeholder="كلمة السر">
-                <button onclick="addUser()" class="btn btn-print">إضافة</button>
+            <h3 style="color:var(--sec-blue)">➕ إضافة مفتش جديد</h3>
+            <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                <input type="text" id="nu" placeholder="اسم المستخدم (الانجليزية)" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                <input type="text" id="np" placeholder="كلمة السر" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #ddd;">
+                <button onclick="addUser()" class="btn btn-print">إضافة مفتش</button>
             </div>
         </div>
-        <div id="usersList"></div>
+        <div class="card">
+            <h3>👥 المفتشين الحاليين</h3>
+            <div id="usersList">جاري تحميل القائمة...</div>
+        </div>
     </div>
 </div>
 
@@ -76,6 +90,7 @@
     const REDIS_TOKEN = "AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
     let allReports = [];
 
+    // التحقق من صلاحية المسؤول
     if(sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
 
     function showTab(t) {
@@ -83,9 +98,10 @@
         document.getElementById('viewUsers').style.display = t==='users'?'block':'none';
         document.getElementById('tR').className = t==='reps'?'tab-btn active':'tab-btn';
         document.getElementById('tU').className = t==='users'?'tab-btn active':'tab-btn';
-        if(t==='users') loadUsers(); else fetchReports();
+        if(t === 'users') loadUsers(); else fetchReports();
     }
 
+    // جلب التقارير
     async function fetchReports() {
         try {
             const res = await fetch(`${REDIS_URL}/lrange/reports_list/0/-1`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
@@ -97,54 +113,126 @@
                 if(rJson.result) allReports.push(JSON.parse(rJson.result));
             }
             runSearch();
-        } catch(e) { document.getElementById('reportsList').innerHTML = "خطأ في التحميل"; }
+        } catch(e) { document.getElementById('reportsList').innerHTML = "❌ خطأ في تحميل البيانات"; }
     }
 
+    // البحث والعرض
     function runSearch() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const filtered = allReports.filter(r => 
-            (r.inspector || "").toLowerCase().includes(term) || (r.location || "").toLowerCase().includes(term) || (r.job_order || "").toLowerCase().includes(term)
+            (r.inspector || "").toLowerCase().includes(term) || 
+            (r.location || "").toLowerCase().includes(term) || 
+            (r.job_order || "").toLowerCase().includes(term) ||
+            (r.district || "").toLowerCase().includes(term)
         );
-        const area = document.getElementById('reportsList'); area.innerHTML = "";
+        
+        const area = document.getElementById('reportsList'); 
+        if(filtered.length === 0) { area.innerHTML = "لا توجد نتائج مطابقة"; return; }
+        
+        area.innerHTML = "";
         filtered.reverse().forEach(r => {
             let statusHtml = "";
+            const totalItems = Object.keys(r.answers || {}).length;
             Object.keys(r.answers || {}).forEach(k => {
                 let a = r.answers[k];
                 let c = a === 'نعم' ? 'safe' : (a === 'لا' ? 'danger' : 'na');
                 statusHtml += `<div class="stat-item ${c}">بند ${k}: ${a}</div>`;
             });
+
             let vHtml = "";
             (r.violations || []).forEach(v => {
                 vHtml += `
                 <div class="v-card">
-                    <b style="color:var(--sec-blue)">📍 ${v.q}</b> [${v.ans}]
-                    <p style="margin:5px 0">📝: ${v.note || "لا توجد ملاحظة"}</p>
+                    <b style="color:var(--sec-blue)">📍 ${v.q}</b> <span style="color:red">[الرد: ${v.ans}]</span>
+                    <p style="margin:5px 0"><b>الملاحظة:</b> ${v.note || "لا توجد ملاحظة مكتوبة"}</p>
                     ${v.photo ? `<img src="${v.photo}" class="img-thumb" onclick="openImg(this.src)">` : ""}
                 </div>`;
             });
+
             area.innerHTML += `
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:5px">
-                        <b>📄 تقرير #${r.serial}</b><span>🕒 ${r.timestamp}</span>
+                        <b>📄 تقرير تسلسلي #${r.serial}</b><span>🕒 ${r.timestamp}</span>
                     </div>
-                    <p>👷 المفتش: <b>${r.inspector}</b> | 📍 الموقع: ${r.location} | 📄 المهمة: ${r.job_order}</p>
-                    <details class="no-print"><summary style="cursor:pointer; color:var(--sec-orange); font-weight:bold;">👁️ ملخص جميع البنود (34 بند)</summary>
-                    <div class="status-grid">${statusHtml}</div></details>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; font-size:14px;">
+                        <div>👷 المفتش: <b>${r.inspector}</b></div>
+                        <div>📍 الموقع: <b>${r.location} (${r.district})</b></div>
+                        <div>📄 المهمة/الأمر: <b>${r.job_order}</b></div>
+                        <div>📋 العمل: <b>${r.work_desc}</b></div>
+                    </div>
+                    <hr>
+                    <details class="no-print">
+                        <summary style="cursor:pointer; color:var(--sec-orange); font-weight:bold;">👁️ عرض تفاصيل بنود التفتيش (${totalItems} بند)</summary>
+                        <div class="status-grid">${statusHtml}</div>
+                    </details>
                     <div style="margin-top:10px">
-                        <h4 style="margin-bottom:5px; color:var(--sec-blue); border-bottom:1px solid #eee;">الملاحظات والمرفقات:</h4>
-                        ${vHtml || "لا توجد مرفقات"}
+                        <h4 style="margin-bottom:5px; color:var(--sec-blue); border-bottom:1px solid #eee;">الملاحظات والصور المرفقة:</h4>
+                        ${vHtml || "<p style='color:gray'>لا توجد مخالفات أو مرفقات لهذا التقرير.</p>"}
                     </div>
                     <div class="no-print" style="margin-top:15px; display:flex; gap:10px;">
-                        <button class="btn btn-print" onclick="window.print()">طباعة 🖨️</button>
-                        <button class="btn btn-del" onclick="deleteRep('${r.serial}')">حذف 🗑️</button>
+                        <button class="btn btn-print" onclick="window.print()">طباعة التقرير 🖨️</button>
+                        <button class="btn btn-del" onclick="deleteRep('${r.serial}')">حذف نهائي 🗑️</button>
                     </div>
                 </div>`;
         });
     }
 
+    // إدارة المستخدمين
+    async function loadUsers() {
+        const uList = document.getElementById('usersList');
+        uList.innerHTML = "جاري التحميل...";
+        try {
+            const res = await fetch(`${REDIS_URL}/keys/user:*`, { headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+            const keys = (await res.json()).result || [];
+            let html = "";
+            for(let k of keys) {
+                const name = k.split(':')[1];
+                html += `
+                <div class="user-row">
+                    <span>👤 <b>${name}</b></span>
+                    <button class="btn btn-del" onclick="delUser('${k}')">حذف</button>
+                </div>`;
+            }
+            uList.innerHTML = html || "لا يوجد مفتشين حالياً";
+        } catch(e) { uList.innerHTML = "خطأ في تحميل المستخدمين"; }
+    }
+
+    async function addUser() {
+        const u = document.getElementById('nu').value.trim();
+        const p = document.getElementById('np').value.trim();
+        if(!u || !p) return alert("املاً البيانات");
+        await fetch(`${REDIS_URL}/set/user:${u}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`}, body:p });
+        alert("تمت الإضافة");
+        document.getElementById('nu').value=''; document.getElementById('np').value='';
+        loadUsers();
+    }
+
+    async function delUser(key) {
+        if(confirm("حذف المفتش؟")) {
+            await fetch(`${REDIS_URL}/del/${key}`, { method:'POST', headers:{Authorization:`Bearer ${REDIS_TOKEN}`} });
+            loadUsers();
+        }
+    }
+
+    // حذف التقرير
+    async function deleteRep(id) {
+        if(confirm("هل أنت متأكد من حذف هذا التقرير نهائياً؟ لا يمكن التراجع.")) {
+            try {
+                // حذف التقرير من قاعدة البيانات
+                await fetch(`${REDIS_URL}/del/report:${id}`, { method: 'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+                // حذفه من القائمة المتسلسلة
+                await fetch(`${REDIS_URL}/lrem/reports_list/0/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${REDIS_TOKEN}` } });
+                alert("تم الحذف بنجاح");
+                fetchReports(); // إعادة تحميل البيانات
+            } catch(e) { alert("حدث خطأ أثناء الحذف"); }
+        }
+    }
+
     function openImg(s) { document.getElementById('modalImg').src = s; document.getElementById('imgModal').style.display = 'flex'; }
     function logout() { sessionStorage.clear(); window.location.href='index.html'; }
 
-    async function deleteRep(id) {
-        if(confirm("حذف التقرير؟")) {
-            await fetch(`${
+    // تحميل التقارير عند فتح الصفحة لأول مرة
+    fetchReports();
+</script>
+</body>
+</html>
