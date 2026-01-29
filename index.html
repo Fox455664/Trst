@@ -1,235 +1,193 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام السلامة الميداني - الشركة السعودية للكهرباء</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام السلامة الميداني - الشركة السعودية للكهرباء</title>
 
-    <style>
-        :root { --sec-blue:#005a8f; --sec-orange:#f28b00; --bg:#f4f7f9; }
-        *{box-sizing:border-box;font-family:'Cairo',sans-serif}
-        body{background:var(--bg);margin:0;padding-bottom:90px}
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
-        #loginOverlay{
-            position:fixed;inset:0;
-            background:linear-gradient(135deg,var(--sec-blue),#003a5d);
-            display:flex;align-items:center;justify-content:center;
-            z-index:10000
-        }
-        .login-card{
-            background:#fff;padding:30px;border-radius:20px;
-            width:90%;max-width:420px;text-align:center;
-            box-shadow:0 20px 40px rgba(0,0,0,.3);
-            border-top:6px solid var(--sec-orange)
-        }
-        .logo-hero{width:170px;margin-bottom:15px}
-        .sub-title-archive{
-            color:var(--sec-blue);font-size:14px;font-weight:bold;
-            border-top:1px solid #eee;padding-top:10px;display:block
-        }
+<style>
+:root{--sec-blue:#005a8f;--sec-orange:#f28b00;--bg:#f4f7f9}
+*{box-sizing:border-box;font-family:'Cairo',sans-serif}
+body{background:var(--bg);margin:0;padding-bottom:90px}
 
-        .header{
-            background:#fff;padding:10px 15px;
-            border-bottom:4px solid var(--sec-orange);
-            position:sticky;top:0;z-index:1000;
-            display:flex;justify-content:space-between;align-items:center;
-            box-shadow:0 2px 10px rgba(0,0,0,.1)
-        }
-        .header-right{display:flex;gap:10px;align-items:center}
-        .header-left-box{
-            border:2px solid var(--sec-blue);
-            padding:5px 10px;border-radius:8px;
-            font-size:11px;font-weight:bold;color:var(--sec-blue);
-            background:#f8fafc;text-align:center
-        }
-        .inspector-name{font-size:12px;font-weight:bold;color:var(--sec-blue)}
+#loginOverlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--sec-blue),#003a5d);z-index:10000;display:flex;align-items:center;justify-content:center}
+.login-card{background:#fff;padding:30px;border-radius:20px;width:90%;max-width:420px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3);border-top:6px solid var(--sec-orange)}
+.logo-hero{width:170px;margin-bottom:15px}
+.sub-title-archive{color:var(--sec-blue);font-size:14px;font-weight:bold;margin-top:5px;display:block;border-top:1px solid #eee;padding-top:10px}
 
-        .container{max-width:700px;margin:20px auto;padding:0 15px;display:none}
-        .card{
-            background:#fff;border-radius:15px;padding:20px;
-            margin-bottom:15px;box-shadow:0 4px 6px rgba(0,0,0,.05);
-            border-right:5px solid var(--sec-blue)
-        }
-        input,textarea{
-            width:100%;padding:12px;margin:8px 0;
-            border:1px solid #ddd;border-radius:10px;
-            font-size:14px
-        }
+.header{background:#fff;padding:10px 15px;border-bottom:4px solid var(--sec-orange);position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.header-right{display:flex;gap:10px;align-items:center}
+.header-left-box{border:2px solid var(--sec-blue);padding:5px 10px;border-radius:8px;text-align:center;color:var(--sec-blue);font-weight:bold;font-size:11px;background:#f8fafc}
+.inspector-name{font-size:12px;font-weight:bold;color:var(--sec-blue)}
 
-        .opt-grid{
-            display:grid;grid-template-columns:repeat(3,1fr);
-            gap:10px;margin-top:10px
-        }
-        .opt-btn{
-            background:#f1f5f9;padding:12px 5px;
-            border-radius:8px;cursor:pointer;
-            font-size:11px;font-weight:bold;
-            display:flex;align-items:center;justify-content:center;
-            min-height:55px;border:2px solid transparent
-        }
-        input[type=radio]{display:none}
-        input:checked+.ok{background:#dcfce7;color:#166534;border-color:#22c55e}
-        input:checked+.no{background:#fee2e2;color:#991b1b;border-color:#ef4444}
-        input:checked+.na{background:#e2e8f0;color:#475569;border-color:#94a3b8}
+.container{max-width:720px;margin:20px auto;padding:0 15px;display:none}
+.card{background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 4px 6px rgba(0,0,0,.05);border-right:5px solid var(--sec-blue)}
+input,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
 
-        .attachment-box{
-            display:none;background:#fffcf5;
-            padding:15px;border-radius:10px;
-            border:1px dashed var(--sec-orange);margin-top:10px
-        }
+.opt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.opt-btn{background:#f1f5f9;padding:12px 5px;border-radius:8px;text-align:center;font-size:11px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:55px}
+input[type=radio]{display:none}
+input:checked+.ok{background:#dcfce7;color:#166534;border:2px solid #22c55e}
+input:checked+.no{background:#fee2e2;color:#991b1b;border:2px solid #ef4444}
+input:checked+.na{background:#e2e8f0;color:#475569;border:2px solid #94a3b8}
 
-        .footer{
-            position:fixed;bottom:0;width:100%;
-            background:#fff;padding:15px;text-align:center;
-            box-shadow:0 -5px 15px rgba(0,0,0,.1)
-        }
-        .submit-btn{
-            background:var(--sec-blue);color:#fff;
-            padding:15px;border:none;border-radius:12px;
-            font-size:18px;font-weight:bold;width:90%
-        }
-    </style>
+.attachment-box{display:none;background:#fffcf5;padding:15px;border-radius:10px;margin-top:10px;border:1px dashed var(--sec-orange)}
+
+.footer{position:fixed;bottom:0;width:100%;background:#fff;padding:15px;text-align:center;box-shadow:0 -5px 15px rgba(0,0,0,.1)}
+.submit-btn{background:var(--sec-blue);color:#fff;border:none;padding:15px;border-radius:12px;font-weight:bold;font-size:18px;width:90%}
+</style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginOverlay">
-    <div class="login-card">
-        <img src="imeg/imge.jpg" class="logo-hero">
-        <div style="color:var(--sec-blue);font-weight:bold">
-            الشركة السعودية للكهرباء<br>
-            <small style="color:var(--sec-orange)">نظام تفتيش السلامة الميداني</small>
-            <span class="sub-title-archive">( أرشفة زيارات الاستشاريين لبرامج العمل )</span>
-        </div>
-        <input id="uid" placeholder="اسم المستخدم">
-        <input id="ups" type="password" placeholder="كلمة السر">
-        <button onclick="doLogin()" style="width:100%;padding:15px;background:var(--sec-blue);color:#fff;border:none;border-radius:10px">دخول 🚀</button>
-        <p id="lErr" style="display:none;color:red">❌ بيانات خاطئة</p>
-    </div>
+<div class="login-card">
+<img src="imeg/imge.jpg" class="logo-hero">
+<div style="color:var(--sec-blue);font-weight:bold">
+الشركة السعودية للكهرباء<br>
+<small style="color:var(--sec-orange)">نظام تفتيش السلامة الميداني</small>
+<span class="sub-title-archive">( أرشفة زيارات الاستشاريين لبرامج العمل )</span>
+</div>
+<input id="uid" placeholder="اسم المستخدم">
+<input id="ups" type="password" placeholder="كلمة السر">
+<button onclick="doLogin()" style="width:100%;padding:15px;background:var(--sec-blue);color:#fff;border-radius:10px;border:none;font-weight:bold">دخول 🚀</button>
+<p id="lErr" style="color:red;display:none">❌ بيانات خاطئة</p>
+</div>
 </div>
 
+<!-- APP -->
 <div id="mainApp" class="container">
-    <div class="header">
-        <div class="header-right">
-            <img src="imeg/imge.jpg" style="height:45px">
-            <div>
-                <span id="inspectorLabel" class="inspector-name"></span><br>
-                <span onclick="logout()" style="color:red;font-size:10px;cursor:pointer">🚪 خروج</span>
-            </div>
-        </div>
-        <div class="header-left-box">مجموعة السلامة<br>إدارة ضواحي الرياض</div>
-    </div>
+<div class="header">
+<div class="header-right">
+<img src="imeg/imge.jpg" height="45">
+<div>
+<span id="inspectorLabel" class="inspector-name"></span><br>
+<span onclick="logout()" style="color:red;font-size:10px;cursor:pointer">🚪 خروج</span>
+</div>
+</div>
+<div class="header-left-box">مجموعة السلامة<br>إدارة ضواحي الرياض</div>
+</div>
 
-    <form id="safetyForm">
+<form id="safetyForm">
 
-        <!-- بيانات الموقع -->
-        <div class="card" style="margin-top:20px">
-            <h3 style="color:var(--sec-blue)">📍 بيانات الموقع العام</h3>
+<div class="card">
+<h3 style="color:var(--sec-blue)">📍 بيانات الموقع العام</h3>
 
-            <!-- المطلوب -->
-            <input type="date" id="rDate" name="report_date" required>
-            <input type="text" name="contractor_name" placeholder="اسم المقاول" required>
-            <input type="text" name="receiver_name" placeholder="اسم المستلم" required>
+<input type="date" id="rDate" name="report_date" required>
+<input type="text" name="contractor_name" placeholder="اسم المقاول" required>
+<input type="text" name="receiver_name" placeholder="اسم المستلم" required>
 
-            <input type="text" name="location" placeholder="الموقع / المحطة" required>
-            <input type="text" name="district" placeholder="اسم الحى" required>
-            <input type="text" name="team_name" placeholder="اسم فريق الزيارة" required>
-            <input type="text" name="supervisor_name" placeholder="اسم المشرف" required>
-            <input type="text" name="job_order" placeholder="رقم أمر العمل / المقايسة" required>
-            <input type="text" name="work_desc" placeholder="وصف العمل" required>
-        </div>
+<input name="location" placeholder="الموقع / المحطة" required>
+<input name="district" placeholder="اسم الحي" required>
+<input name="team_name" placeholder="اسم فريق الزيارة" required>
+<input name="supervisor_name" placeholder="اسم المشرف" required>
+<input name="job_order" placeholder="رقم المقايسة / أمر العمل" required>
+<input name="work_desc" placeholder="وصف العمل" required>
+</div>
 
-        <div id="questionsContainer"></div>
+<div id="questionsContainer"></div>
 
-        <div class="footer">
-            <button class="submit-btn" id="sBtn">إرسال التقرير النهائي ✅</button>
-        </div>
-    </form>
+<div class="footer">
+<button class="submit-btn" id="sBtn">إرسال التقرير النهائي ✅</button>
+</div>
+
+</form>
 </div>
 
 <script>
 const REDIS_URL="https://exact-parakeet-58043.upstash.io";
 const REDIS_TOKEN="AeK7AAIncDFmOTAzMGJlOTM5Y2I0ZTFjYTg4ODRhOWIyNjJmZWMwY3AxNTgwNDM";
 
-const qList=["* تصريح العمل الأساسي والثانوي متواجد بموقع العمل","* اجتماع ما قبل البدء بالعمل متواجد بموقع العمل","* ملاحظات"];
+const qList=[
+"* تصريح العمل الأساسي والثانوي متواجد بموقع العمل",
+"* اجتماع ما قبل البدء بالعمل متواجد بموقع العمل",
+"* نموذج فريق العمل متواجد بموقع العمل",
+"* إجراءات العمل الآمن وتقييم المخاطر",
+"* إلمام المستلم وفريق العمل بالإجراءات",
+"* ملاحظات",
+"* بطاقة تعميد المصدر والمستلم",
+"* تأهيل سائق المعدات",
+"* المستلم متواجد بموقع العمل",
+"* أقفال السلامة والبطاقات التحذيرية",
+"* تركيب الأرضي المتنقل",
+"* جهاز كشف الجهد",
+"* نموذج فحص المركبة",
+"* نماذج الفحص",
+"* شهادة المسعف",
+"* شهادة المكافح",
+"* شهادة TUV",
+"* QR Code",
+"* فحص معدات الرفع",
+"* مطابقة السلات",
+"* سلامة خطاف الونش",
+"* طفاية حريق",
+"* شنطة إسعافات",
+"* تركيب الأرضي للسيارات",
+"* الحمل الأقصى محدد",
+"* معدات الوقاية الشخصية",
+"* فحص القفاز المطاطي",
+"* الخوذة الكهربائية",
+"* أحزمة السلامة",
+"* الحواجز والشريط التحذيري",
+"* اللوحات الإرشادية",
+"* الترميز بالألوان",
+"* تخزين أسطوانات الغاز",
+"* أغطية الحماية",
+"* ليات الأوكسجين",
+"* سلامة المنظم",
+"* شعار المقاول",
+"* إزالة المخلفات",
+"* خطة الطوارئ",
+"* خطة منع السقوط",
+"* خطة الإنقاذ",
+"* خطة رفع الأحمال"
+];
 
-async function doLogin(){
-    const u=uid.value,p=ups.value;
-    try{
-        const r=await fetch(`${REDIS_URL}/get/user:${u}`,{headers:{Authorization:`Bearer ${REDIS_TOKEN}`}});
-        const d=await r.json();
-        if(d.result===p){sessionStorage.setItem("inspector",u);startApp(u)}
-        else lErr.style.display="block";
-    }catch{alert("خطأ اتصال")}
+function doLogin(){
+if(uid.value==="admin"&&ups.value==="admin2025"){location.href="admin.html";return}
+fetch(`${REDIS_URL}/get/user:${uid.value}`,{headers:{Authorization:`Bearer ${REDIS_TOKEN}`}})
+.then(r=>r.json()).then(d=>{
+if(d.result===ups.value){sessionStorage.setItem("inspector",uid.value);startApp()}
+else lErr.style.display="block"
+})
 }
 
-function startApp(u){
-    loginOverlay.style.display="none";
-    mainApp.style.display="block";
-    inspectorLabel.innerText="المفتش: "+u;
-    rDate.valueAsDate=new Date();
-    loadQuestions();
+function startApp(){
+loginOverlay.style.display="none";
+mainApp.style.display="block";
+inspectorLabel.innerText="المفتش: "+sessionStorage.getItem("inspector");
+rDate.valueAsDate=new Date();
+loadQuestions();
 }
 
 function loadQuestions(){
-    let h="";
-    qList.forEach((q,i)=>{
-        const n=i+1;
-        h+=`
-        <div class="card">
-            <b>${n}. ${q}</b>
-            <div class="opt-grid">
-                <label><input type="radio" name="q${n}" value="نعم" required onclick="showAttach(${n})"><div class="opt-btn ok">نعم</div></label>
-                <label><input type="radio" name="q${n}" value="لا" onclick="showAttach(${n})"><div class="opt-btn no">لا</div></label>
-                <label><input type="radio" name="q${n}" value="لا ينطبق" onclick="showAttach(${n})"><div class="opt-btn na">لا ينطبق</div></label>
-            </div>
-            <div class="attachment-box" id="abox${n}">
-                <textarea id="note${n}" placeholder="ملاحظة"></textarea>
-            </div>
-        </div>`;
-    });
-    questionsContainer.innerHTML=h;
+let h="";
+qList.forEach((q,i)=>{
+let n=i+1;
+h+=`
+<div class="card">
+<b>${n}. ${q}</b>
+<div class="opt-grid">
+<label><input type="radio" name="q${n}" value="نعم" onclick="showAttach(${n})" required><div class="opt-btn ok">نعم</div></label>
+<label><input type="radio" name="q${n}" value="لا" onclick="showAttach(${n})"><div class="opt-btn no">لا</div></label>
+<label><input type="radio" name="q${n}" value="لا ينطبق" onclick="showAttach(${n})"><div class="opt-btn na">لا ينطبق</div></label>
+</div>
+<div id="abox${n}" class="attachment-box">
+<input type="file" id="img${n}" accept="image/*">
+<textarea id="note${n}" placeholder="ملاحظة"></textarea>
+</div>
+</div>`;
+});
+questionsContainer.innerHTML=h;
 }
 
 function showAttach(i){document.getElementById("abox"+i).style.display="block"}
-
-safetyForm.onsubmit=async e=>{
-    e.preventDefault();
-    sBtn.disabled=true;
-    const fd=new FormData(e.target);
-    const id=Date.now();
-
-    const report={
-        serial:id,
-        inspector:sessionStorage.getItem("inspector"),
-        timestamp:new Date().toLocaleString("ar-EG"),
-        contractor_name:fd.get("contractor_name"),
-        receiver_name:fd.get("receiver_name"),
-        location:fd.get("location"),
-        district:fd.get("district"),
-        team_name:fd.get("team_name"),
-        supervisor_name:fd.get("supervisor_name"),
-        job_order:fd.get("job_order"),
-        work_desc:fd.get("work_desc"),
-        answers:{}
-    };
-
-    qList.forEach((_,i)=>report.answers[i+1]=fd.get("q"+(i+1)));
-
-    await fetch(`${REDIS_URL}/set/report:${id}`,{
-        method:"POST",
-        headers:{Authorization:`Bearer ${REDIS_TOKEN}`},
-        body:JSON.stringify(report)
-    });
-
-    alert("✅ تم الإرسال");
-    location.reload();
-};
 
 function logout(){sessionStorage.clear();location.reload()}
 </script>
 
 </body>
 </html>
-.
